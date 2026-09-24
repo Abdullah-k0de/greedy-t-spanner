@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+venv-*/
+ENV/
+*.env
+
+venv-greedy-t-spanner/
+venv-greedy-t-spanner-*/
+venv-*/
+ENV/
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project Data (avoid committing large binary/graph dumps if git is used)
+data/graphs/
+data/pairs/
+# keep csv
+!data/*.csv
