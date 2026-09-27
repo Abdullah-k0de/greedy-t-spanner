@@ -27,10 +27,10 @@ EXT_CSV = os.path.join("data", "proposal_extensions_metrics.csv")
 FIGURES_DIR = "figures"
 
 TOPOLOGY_COLORS = {
-    "BA": "#f59e0b",   # Amber
-    "WS": "#38bdf8",   # Sky Blue
-    "ER": "#f43f5e",   # Rose Red
-    "GRID": "#2dd4bf"  # Teal
+    "BA": "#d97706",   # Deep Amber
+    "WS": "#0284c7",   # Vibrant Blue
+    "ER": "#e11d48",   # Crimson / Deep Rose
+    "GRID": "#0d9488"  # Forest Teal
 }
 
 TOPOLOGY_LABELS = {
@@ -79,7 +79,7 @@ def load_and_compute_metrics():
 def plot_chart5_relative_vs_absolute(df):
     """Chart 5: Resolving the Hubs vs Grid Hypothesis (Relative Stretch vs Absolute Detour Hops)."""
     print("Generating Chart 5: Relative Stretch vs. Absolute Delay...")
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7), facecolor="#0e1117")
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7), facecolor="#ffffff")
 
     topos = ["BA", "ER", "GRID", "WS"]
     t_vals = [3, 5, 7]
@@ -87,7 +87,7 @@ def plot_chart5_relative_vs_absolute(df):
     width = 0.18
 
     # Panel 1: Multiplicative Relative Stretch
-    ax1.set_facecolor("#161b22")
+    ax1.set_facecolor("#ffffff")
     for i, topo in enumerate(topos):
         subset = df[df["topology"] == topo]
         means = [subset[subset["t_limit"] == t]["avg_stretch"].mean() for t in t_vals]
@@ -95,25 +95,27 @@ def plot_chart5_relative_vs_absolute(df):
         pos = x + (i - 1.5) * width
         bars = ax1.bar(pos, means, width, yerr=stds, capsize=4,
                        color=TOPOLOGY_COLORS[topo], label=TOPOLOGY_LABELS[topo],
-                       edgecolor="#ffffff", linewidth=0.6, alpha=0.9)
+                       edgecolor="#1f2937", linewidth=0.8, alpha=0.9)
         for bar in bars:
             yval = bar.get_height()
             ax1.text(bar.get_x() + bar.get_width()/2.0, yval + 0.03, f"{yval:.2f}",
-                     ha="center", va="bottom", fontsize=8.5, color="#e6edf3", fontweight="bold")
+                     ha="center", va="bottom", fontsize=9, color="#111827", fontweight="bold")
 
     ax1.set_title("Panel A: Multiplicative Relative Stretch (dS / dG)\n[Scale-Free Appears Worse]",
-                  color="#e6edf3", fontsize=13, fontweight="bold", pad=12)
-    ax1.set_xlabel("Stretch Factor (t)", color="#8b949e", fontsize=11, labelpad=8)
-    ax1.set_ylabel("Empirical Average Stretch (Multiplicative)", color="#8b949e", fontsize=11)
+                  color="#111827", fontsize=13, fontweight="bold", pad=12)
+    ax1.set_xlabel("Stretch Factor (t)", color="#374151", fontsize=11, labelpad=8)
+    ax1.set_ylabel("Empirical Average Stretch (Multiplicative)", color="#374151", fontsize=11)
     ax1.set_xticks(x)
-    ax1.set_xticklabels([f"t = {t}" for t in t_vals], color="#e6edf3", fontsize=10)
+    ax1.set_xticklabels([f"t = {t}" for t in t_vals], color="#111827", fontsize=10.5)
     ax1.set_ylim(0.9, 1.85)
-    ax1.tick_params(colors="#8b949e")
-    ax1.grid(True, linestyle="--", alpha=0.15, color="#8b949e", axis="y")
-    ax1.legend(loc="upper left", facecolor="#21262d", edgecolor="#30363d", labelcolor="#e6edf3", fontsize=9)
+    ax1.tick_params(colors="#111827")
+    for spine in ax1.spines.values():
+        spine.set_color("#9ca3af")
+    ax1.grid(True, linestyle="--", alpha=0.7, color="#e5e7eb", axis="y")
+    ax1.legend(loc="upper left", facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=9.5)
 
     # Panel 2: Absolute Additive Delay (Hops Added)
-    ax2.set_facecolor("#161b22")
+    ax2.set_facecolor("#ffffff")
     for i, topo in enumerate(topos):
         subset = df[df["topology"] == topo]
         means = [subset[subset["t_limit"] == t]["additive_hops"].mean() for t in t_vals]
@@ -121,28 +123,30 @@ def plot_chart5_relative_vs_absolute(df):
         pos = x + (i - 1.5) * width
         bars = ax2.bar(pos, means, width, yerr=stds, capsize=4,
                        color=TOPOLOGY_COLORS[topo], label=TOPOLOGY_LABELS[topo],
-                       edgecolor="#ffffff", linewidth=0.6, alpha=0.9)
+                       edgecolor="#1f2937", linewidth=0.8, alpha=0.9)
         for bar in bars:
             yval = bar.get_height()
             ax2.text(bar.get_x() + bar.get_width()/2.0, yval + 0.12, f"+{yval:.2f}",
-                     ha="center", va="bottom", fontsize=8.5, color="#e6edf3", fontweight="bold")
+                     ha="center", va="bottom", fontsize=9, color="#111827", fontweight="bold")
 
     ax2.set_title("Panel B: Absolute Additive Delay (dS - dG in Hops)\n[Scale-Free Actually Protects Detour Length!]",
-                  color="#e6edf3", fontsize=13, fontweight="bold", pad=12)
-    ax2.set_xlabel("Stretch Factor (t)", color="#8b949e", fontsize=11, labelpad=8)
-    ax2.set_ylabel("Mean Detour Hops Added", color="#8b949e", fontsize=11)
+                  color="#111827", fontsize=13, fontweight="bold", pad=12)
+    ax2.set_xlabel("Stretch Factor (t)", color="#374151", fontsize=11, labelpad=8)
+    ax2.set_ylabel("Mean Detour Hops Added", color="#374151", fontsize=11)
     ax2.set_xticks(x)
-    ax2.set_xticklabels([f"t = {t}" for t in t_vals], color="#e6edf3", fontsize=10)
+    ax2.set_xticklabels([f"t = {t}" for t in t_vals], color="#111827", fontsize=10.5)
     ax2.set_ylim(0, 5.5)
-    ax2.tick_params(colors="#8b949e")
-    ax2.grid(True, linestyle="--", alpha=0.15, color="#8b949e", axis="y")
-    ax2.legend(loc="upper left", facecolor="#21262d", edgecolor="#30363d", labelcolor="#e6edf3", fontsize=9)
+    ax2.tick_params(colors="#111827")
+    for spine in ax2.spines.values():
+        spine.set_color("#9ca3af")
+    ax2.grid(True, linestyle="--", alpha=0.7, color="#e5e7eb", axis="y")
+    ax2.legend(loc="upper left", facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=9.5)
 
     plt.suptitle("The Structural Duality: Resolving the 'Hubs vs. Grid' Hypothesis",
-                 color="#f0f6fc", fontsize=15, fontweight="bold", y=0.98)
+                 color="#111827", fontsize=15, fontweight="bold", y=0.98)
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     out_path = os.path.join(FIGURES_DIR, "chart5_relative_vs_absolute_delay.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor())
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved Chart 5 -> {out_path}")
 
@@ -150,13 +154,13 @@ def plot_chart5_relative_vs_absolute(df):
 def plot_chart6_slack_and_runtime(df):
     """Chart 6: Theoretical Slack / Pessimism Index and Computational Runtime Scaling."""
     print("Generating Chart 6: Theoretical Slack and Runtime Scaling...")
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7), facecolor="#0e1117")
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7), facecolor="#ffffff")
 
     topos = ["BA", "ER", "GRID", "WS"]
     t_vals = [3, 5, 7]
 
     # Panel A: Theoretical Slack (t - Max Stretch)
-    ax1.set_facecolor("#161b22")
+    ax1.set_facecolor("#ffffff")
     for topo in topos:
         subset = df[df["topology"] == topo]
         means = [subset[subset["t_limit"] == t]["theoretical_slack"].mean() for t in t_vals]
@@ -167,17 +171,19 @@ def plot_chart6_slack_and_runtime(df):
                          color=TOPOLOGY_COLORS[topo], alpha=0.18)
 
     ax1.set_title("Panel A: Theoretical Slack (t - Max Stretch)\n[Safety Margin Below Worst-Case Ceiling]",
-                  color="#e6edf3", fontsize=13, fontweight="bold", pad=12)
-    ax1.set_xlabel("Theoretical Stretch Bound (t)", color="#8b949e", fontsize=11, labelpad=8)
-    ax1.set_ylabel("Slack Margin (Higher = More Pessimistic)", color="#8b949e", fontsize=11)
+                  color="#111827", fontsize=13, fontweight="bold", pad=12)
+    ax1.set_xlabel("Theoretical Stretch Bound (t)", color="#374151", fontsize=11, labelpad=8)
+    ax1.set_ylabel("Slack Margin (Higher = More Pessimistic)", color="#374151", fontsize=11)
     ax1.set_xticks(t_vals)
-    ax1.set_xticklabels([f"t = {t}" for t in t_vals], color="#e6edf3", fontsize=10)
-    ax1.tick_params(colors="#8b949e")
-    ax1.grid(True, linestyle="--", alpha=0.15, color="#8b949e")
-    ax1.legend(loc="upper left", facecolor="#21262d", edgecolor="#30363d", labelcolor="#e6edf3", fontsize=9)
+    ax1.set_xticklabels([f"t = {t}" for t in t_vals], color="#111827", fontsize=10.5)
+    ax1.tick_params(colors="#111827")
+    for spine in ax1.spines.values():
+        spine.set_color("#9ca3af")
+    ax1.grid(True, linestyle="--", alpha=0.7, color="#e5e7eb")
+    ax1.legend(loc="upper left", facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=9.5)
 
     # Panel B: Computational Runtime Scaling (build_time_sec)
-    ax2.set_facecolor("#161b22")
+    ax2.set_facecolor("#ffffff")
     for topo in topos:
         subset = df[df["topology"] == topo]
         means = [subset[subset["t_limit"] == t]["build_time_sec"].mean() * 1000.0 for t in t_vals]
@@ -188,20 +194,22 @@ def plot_chart6_slack_and_runtime(df):
                          color=TOPOLOGY_COLORS[topo], alpha=0.18)
 
     ax2.set_title("Panel B: Algorithmic Construction Time\n[BFS Tree Explosion in Scale-Free Hubs]",
-                  color="#e6edf3", fontsize=13, fontweight="bold", pad=12)
-    ax2.set_xlabel("Stretch Bound (t)", color="#8b949e", fontsize=11, labelpad=8)
-    ax2.set_ylabel("Spanner Construction Time (Milliseconds)", color="#8b949e", fontsize=11)
+                  color="#111827", fontsize=13, fontweight="bold", pad=12)
+    ax2.set_xlabel("Stretch Bound (t)", color="#374151", fontsize=11, labelpad=8)
+    ax2.set_ylabel("Spanner Construction Time (Milliseconds)", color="#374151", fontsize=11)
     ax2.set_xticks(t_vals)
-    ax2.set_xticklabels([f"t = {t}" for t in t_vals], color="#e6edf3", fontsize=10)
-    ax2.tick_params(colors="#8b949e")
-    ax2.grid(True, linestyle="--", alpha=0.15, color="#8b949e")
-    ax2.legend(loc="upper left", facecolor="#21262d", edgecolor="#30363d", labelcolor="#e6edf3", fontsize=9)
+    ax2.set_xticklabels([f"t = {t}" for t in t_vals], color="#111827", fontsize=10.5)
+    ax2.tick_params(colors="#111827")
+    for spine in ax2.spines.values():
+        spine.set_color("#9ca3af")
+    ax2.grid(True, linestyle="--", alpha=0.7, color="#e5e7eb")
+    ax2.legend(loc="upper left", facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=9.5)
 
     plt.suptitle("Algorithmic Practicality: Theoretical Pessimism & Runtime Overhead",
-                 color="#f0f6fc", fontsize=15, fontweight="bold", y=0.98)
+                 color="#111827", fontsize=15, fontweight="bold", y=0.98)
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     out_path = os.path.join(FIGURES_DIR, "chart6_theoretical_slack_and_runtime.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor())
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved Chart 6 -> {out_path}")
 

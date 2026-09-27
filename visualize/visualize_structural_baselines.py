@@ -34,7 +34,7 @@ def ensure_figures_dir():
 def plot_topologies_native_layouts():
     """Generate 2x2 panel showing BA, WS, ER, and Grid in their native layouts."""
     print("Rendering 2x2 Native Layouts Comparison...")
-    fig, axes = plt.subplots(2, 2, figsize=(18, 16), facecolor="#0e1117")
+    fig, axes = plt.subplots(2, 2, figsize=(18, 16), facecolor="#ffffff")
 
     topo_configs = [
         ("BA_00", "Barabási–Albert (BA_00)", axes[0, 0], "ba"),
@@ -44,7 +44,7 @@ def plot_topologies_native_layouts():
     ]
 
     for filename_stem, title, ax, layout_type in topo_configs:
-        ax.set_facecolor("#0e1117")
+        ax.set_facecolor("#ffffff")
         graph_path = os.path.join("data", "graphs", f"{filename_stem}.graphml")
         if not os.path.exists(graph_path):
             print(f"Warning: {graph_path} not found.")
@@ -58,29 +58,29 @@ def plot_topologies_native_layouts():
         if layout_type == "ws":
             # Circular layout highlights local lattice chords and cross-ring shortcuts
             pos = nx.circular_layout(G)
-            edge_color = "#38bdf8"
-            edge_alpha = 0.20
+            edge_color = "#0284c7"
+            edge_alpha = 0.35
             edge_width = 0.5
             node_sizes = [12 for _ in G.nodes()]
-            node_color = "#f59e0b"
+            node_color = "#d97706"
             subtitle = f"N = {G.number_of_nodes()}, |E| = {G.number_of_edges()} | Circular Layout (Ring + Shortcuts)"
 
         elif layout_type == "grid":
             # True 2D coordinate lattice (25 rows x 40 cols)
             cols = 40
             pos = {i: (i % cols, -(i // cols)) for i in G.nodes()}
-            edge_color = "#2dd4bf"
-            edge_alpha = 0.70
+            edge_color = "#0d9488"
+            edge_alpha = 0.85
             edge_width = 0.8
             node_sizes = [6 for _ in G.nodes()]
-            node_color = "#f8fafc"
+            node_color = "#1f2937"
             subtitle = f"N = {G.number_of_nodes()}, |E| = {G.number_of_edges()} | Planar 25x40 Coordinate Lattice"
 
         elif layout_type == "ba":
             # Spring layout with node size proportional to hub degree
             pos = nx.spring_layout(G, k=0.08, iterations=50, seed=42)
-            edge_color = "#94a3b8"
-            edge_alpha = 0.20
+            edge_color = "#64748b"
+            edge_alpha = 0.25
             edge_width = 0.5
             node_sizes = [10 + 180 * (degrees[n] / max_deg) for n in G.nodes()]
             node_color = [degrees[n] for n in G.nodes()]
@@ -89,11 +89,11 @@ def plot_topologies_native_layouts():
         else:  # er
             # Uniform spring layout
             pos = nx.spring_layout(G, k=0.06, iterations=50, seed=42)
-            edge_color = "#a78bfa"
-            edge_alpha = 0.22
+            edge_color = "#e11d48"
+            edge_alpha = 0.30
             edge_width = 0.5
             node_sizes = [12 for _ in G.nodes()]
-            node_color = "#f43f5e"
+            node_color = "#be123c"
             subtitle = f"N = {G.number_of_nodes()}, |E| = {G.number_of_edges()} | Uniform Random Dispersion"
 
         # Draw edges
@@ -124,13 +124,13 @@ def plot_topologies_native_layouts():
                 ax=ax
             )
 
-        ax.set_title(f"{title}\n{subtitle}", color="white", fontsize=13, pad=10, fontweight="bold")
+        ax.set_title(f"{title}\n{subtitle}", color="#111827", fontsize=13, pad=10, fontweight="bold")
         ax.axis("off")
 
     plt.suptitle(
         "Topological Archetypes Under Density Control (N = 1000, d_bar ≈ 3.8 - 4.0)\n"
         "Rendered in Respective Native Geometries",
-        color="white",
+        color="#111827",
         fontsize=16,
         fontweight="bold",
         y=0.99
@@ -138,7 +138,7 @@ def plot_topologies_native_layouts():
     plt.tight_layout()
 
     out_path = os.path.join("figures", "baseline_topologies_native_layouts.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved: {out_path}")
 
@@ -163,10 +163,10 @@ def plot_empirical_degree_distributions():
                 degree_data[topo].append(d)
 
     colors = {
-        "BA": "#f59e0b",   # Amber / Orange
-        "WS": "#38bdf8",   # Sky Blue
-        "ER": "#f43f5e",   # Rose / Red
-        "GRID": "#2dd4bf"  # Teal
+        "BA": "#d97706",   # Deep Amber
+        "WS": "#0284c7",   # Vibrant Blue
+        "ER": "#e11d48",   # Crimson
+        "GRID": "#0d9488"  # Forest Teal
     }
 
     labels = {
@@ -176,9 +176,9 @@ def plot_empirical_degree_distributions():
         "GRID": "2D Grid (Lattice)"
     }
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7), facecolor="#0e1117")
-    ax1.set_facecolor("#0e1117")
-    ax2.set_facecolor("#0e1117")
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7), facecolor="#ffffff")
+    ax1.set_facecolor("#ffffff")
+    ax2.set_facecolor("#ffffff")
 
     # Plot 1: Linear Probability Density P(k)
     for topo, degs in degree_data.items():
@@ -196,12 +196,14 @@ def plot_empirical_degree_distributions():
             label=f"{labels[topo]} (N={total_nodes})"
         )
 
-    ax1.set_title("Empirical Degree Distribution P(k) [Linear Scale]", color="white", fontsize=14, fontweight="bold", pad=12)
-    ax1.set_xlabel("Degree (k)", color="white", fontsize=12)
-    ax1.set_ylabel("Probability P(k)", color="white", fontsize=12)
-    ax1.tick_params(colors="white")
-    ax1.grid(color="#334155", linestyle="--", alpha=0.5)
-    ax1.legend(facecolor="#1e293b", edgecolor="#475569", labelcolor="white", fontsize=10)
+    ax1.set_title("Empirical Degree Distribution P(k) [Linear Scale]", color="#111827", fontsize=14, fontweight="bold", pad=12)
+    ax1.set_xlabel("Degree (k)", color="#374151", fontsize=12)
+    ax1.set_ylabel("Probability P(k)", color="#374151", fontsize=12)
+    ax1.tick_params(colors="#111827")
+    for spine in ax1.spines.values():
+        spine.set_color("#9ca3af")
+    ax1.grid(color="#e5e7eb", linestyle="--", alpha=0.7)
+    ax1.legend(facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=10.5)
 
     # Plot 2: Log-Log Scale to expose Power-Law vs Bounded Tails
     for topo, degs in degree_data.items():
@@ -219,17 +221,19 @@ def plot_empirical_degree_distributions():
             label=f"{labels[topo]}"
         )
 
-    ax2.set_title("Topological Degree Fingerprint [Log-Log Scale]\n(Power-Law Line vs Poisson vs Rigid Spike)", color="white", fontsize=14, fontweight="bold", pad=12)
-    ax2.set_xlabel("Degree k (log scale)", color="white", fontsize=12)
-    ax2.set_ylabel("Probability P(k) (log scale)", color="white", fontsize=12)
-    ax2.tick_params(colors="white")
-    ax2.grid(color="#334155", linestyle="--", alpha=0.5)
-    ax2.legend(facecolor="#1e293b", edgecolor="#475569", labelcolor="white", fontsize=10)
+    ax2.set_title("Topological Degree Fingerprint [Log-Log Scale]\n(Power-Law Line vs Poisson vs Rigid Spike)", color="#111827", fontsize=14, fontweight="bold", pad=12)
+    ax2.set_xlabel("Degree k (log scale)", color="#374151", fontsize=12)
+    ax2.set_ylabel("Probability P(k) (log scale)", color="#374151", fontsize=12)
+    ax2.tick_params(colors="#111827")
+    for spine in ax2.spines.values():
+        spine.set_color("#9ca3af")
+    ax2.grid(color="#e5e7eb", linestyle="--", alpha=0.7)
+    ax2.legend(facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=10.5)
 
     plt.suptitle(
         f"Empirical Degree Distributions Aggregated Over All 120 Instances (120,000 Nodes Total)\n"
         f"Mathematical Proof of Structural Divergence Under Strict Mean Degree Invariance (d_bar ≈ 4.0)",
-        color="white",
+        color="#111827",
         fontsize=15,
         fontweight="bold",
         y=1.03
@@ -237,7 +241,7 @@ def plot_empirical_degree_distributions():
     plt.tight_layout()
 
     out_path = os.path.join("figures", "baseline_degree_distributions.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved: {out_path}")
 
@@ -253,14 +257,14 @@ def plot_clustering_vs_path_length():
 
     df = pd.read_csv(csv_path)
 
-    fig, ax = plt.subplots(figsize=(12, 8), facecolor="#0e1117")
-    ax.set_facecolor("#0e1117")
+    fig, ax = plt.subplots(figsize=(12, 8), facecolor="#ffffff")
+    ax.set_facecolor("#ffffff")
 
     colors = {
-        "BA": "#f59e0b",
-        "WS": "#38bdf8",
-        "ER": "#f43f5e",
-        "GRID": "#2dd4bf"
+        "BA": "#d97706",
+        "WS": "#0284c7",
+        "ER": "#e11d48",
+        "GRID": "#0d9488"
     }
 
     markers = {
@@ -285,69 +289,71 @@ def plot_clustering_vs_path_length():
             marker=markers[topo],
             s=90,
             alpha=0.85,
-            edgecolors="#ffffff",
-            linewidths=0.6,
+            edgecolors="#1f2937",
+            linewidths=0.7,
             label=f"{labels[topo]} (N=30)"
         )
 
     ax.set_title(
         "Empirical Phase Space: Clustering Coefficient (C) vs. Average Path Length (L)\n"
         "120 Independent Benchmark Instances (N = 1000, d_bar ≈ 3.8 - 4.0)",
-        color="white",
+        color="#111827",
         fontsize=14,
         fontweight="bold",
         pad=15
     )
-    ax.set_xlabel("Average Shortest-Path Length (L)", color="white", fontsize=12)
-    ax.set_ylabel("Average Clustering Coefficient (C)", color="white", fontsize=12)
-    ax.tick_params(colors="white")
-    ax.grid(color="#334155", linestyle="--", alpha=0.5)
-    ax.legend(facecolor="#1e293b", edgecolor="#475569", labelcolor="white", fontsize=11, loc="center right")
+    ax.set_xlabel("Average Shortest-Path Length (L)", color="#374151", fontsize=12)
+    ax.set_ylabel("Average Clustering Coefficient (C)", color="#374151", fontsize=12)
+    ax.tick_params(colors="#111827", labelsize=10.5)
+    for spine in ax.spines.values():
+        spine.set_color("#9ca3af")
+    ax.grid(color="#e5e7eb", linestyle="--", alpha=0.7)
+    ax.legend(facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=11, loc="center right")
 
     # Add explanatory callout annotations for all 4 topologies individually
     ax.annotate(
         "Watts–Strogatz\n(High Clustering C ≈ 0.37,\nShort Paths L ≈ 8.8)",
         xy=(8.80, 0.373),
         xytext=(11.0, 0.35),
-        color="#38bdf8",
+        color="#0284c7",
         fontsize=10,
         fontweight="bold",
-        arrowprops=dict(facecolor="#38bdf8", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+        arrowprops=dict(facecolor="#0284c7", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
     )
 
     ax.annotate(
         "Barabási–Albert\n(Ultra-Short Paths L ≈ 4.1,\nHubs / Low Clustering C ≈ 0.026)",
         xy=(4.06, 0.026),
         xytext=(3.4, 0.16),
-        color="#f59e0b",
+        color="#d97706",
         fontsize=10,
         fontweight="bold",
-        arrowprops=dict(facecolor="#f59e0b", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+        arrowprops=dict(facecolor="#d97706", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
     )
 
     ax.annotate(
         "Erdős–Rényi (Random)\n(Short Paths L ≈ 5.4,\nZero Clustering C ≈ 0.0036)",
         xy=(5.37, 0.0036),
         xytext=(7.2, 0.07),
-        color="#f43f5e",
+        color="#e11d48",
         fontsize=10,
         fontweight="bold",
-        arrowprops=dict(facecolor="#f43f5e", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+        arrowprops=dict(facecolor="#e11d48", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
     )
 
     ax.annotate(
         "Perturbed 2D Grid\n(Zero Clustering C = 0,\nHigh Path Length L ≈ 21.7)",
         xy=(21.70, 0.005),
         xytext=(16.0, 0.08),
-        color="#2dd4bf",
+        color="#0d9488",
         fontsize=10,
         fontweight="bold",
-        arrowprops=dict(facecolor="#2dd4bf", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+        arrowprops=dict(facecolor="#0d9488", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
     )
 
     plt.tight_layout()
     out_path = os.path.join("figures", "baseline_clustering_vs_path_length.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved: {out_path}")
 

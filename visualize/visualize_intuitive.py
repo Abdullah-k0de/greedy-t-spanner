@@ -16,7 +16,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 # Ensure project root is in sys.path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.spanner import build_greedy_spanner, generate_edge_permutation
 
@@ -39,19 +39,19 @@ def plot_grid_spanner_thinning():
     cols = 40
     pos = {i: (i % cols, -(i // cols)) for i in G.nodes()}
 
-    fig, axes = plt.subplots(1, 4, figsize=(26, 6), facecolor="#0e1117")
+    fig, axes = plt.subplots(1, 4, figsize=(26, 6), facecolor="#ffffff")
     t_values = [None, 3, 5, 7]
     shuffled_edges = generate_edge_permutation(G, seed=42)
     original_edges = set(G.edges())
 
     for idx, (ax, t_val) in enumerate(zip(axes, t_values)):
-        ax.set_facecolor("#0e1117")
+        ax.set_facecolor("#ffffff")
 
         if t_val is None:
             retained = list(original_edges)
             pruned = []
             title = f"Original 2D Grid (GRID_00)\n|E| = {len(retained)} edges (100%)"
-            edge_color = "#38bdf8"
+            edge_color = "#0284c7"
         else:
             H = build_greedy_spanner(G, t=t_val, edge_order=shuffled_edges)
             retained_set = set(H.edges())
@@ -62,15 +62,15 @@ def plot_grid_spanner_thinning():
             ]
             pct = (len(retained) / len(original_edges)) * 100
             title = f"t = {t_val} Spanner\n|E_H| = {len(retained)} ({pct:.1f}%) | Pruned: {len(pruned)}"
-            edge_color = "#2dd4bf"
+            edge_color = "#0d9488"
 
         # Pruned edges in dashed red
         if pruned:
             nx.draw_networkx_edges(
                 G, pos,
                 edgelist=pruned,
-                alpha=0.35,
-                edge_color="#ef4444",
+                alpha=0.30,
+                edge_color="#e11d48",
                 style="dashed",
                 width=1.0,
                 ax=ax
@@ -90,18 +90,18 @@ def plot_grid_spanner_thinning():
         nx.draw_networkx_nodes(
             G, pos,
             node_size=6,
-            node_color="#f8fafc",
+            node_color="#1f2937",
             alpha=0.7,
             ax=ax
         )
 
-        ax.set_title(title, color="white", fontsize=12, pad=10, fontweight="bold")
+        ax.set_title(title, color="#111827", fontsize=12, pad=10, fontweight="bold")
         ax.axis("off")
 
     plt.suptitle(
         "Planar Grid Spanner Thinning on GRID_00 (25 x 40 Lattice, N = 1000)\n"
         "(Pruned edges = dashed red | Retained spanner edges = solid teal)",
-        color="white",
+        color="#111827",
         fontsize=14,
         fontweight="bold",
         y=1.04
@@ -109,7 +109,7 @@ def plot_grid_spanner_thinning():
     plt.tight_layout()
 
     out_path = os.path.join("figures", "grid_spanner_thinning.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved: {out_path}")
 
@@ -144,20 +144,20 @@ def plot_zoomed_hub_thinning():
     # Force the central hub directly into the center (0, 0)
     pos[hub_node] = (0.0, 0.0)
 
-    fig, axes = plt.subplots(1, 4, figsize=(24, 6), facecolor="#0e1117")
+    fig, axes = plt.subplots(1, 4, figsize=(24, 6), facecolor="#ffffff")
     t_values = [None, 3, 5, 7]
 
-    node_colors = ["#f59e0b" if n == hub_node else "#38bdf8" for n in subgraph.nodes()]
+    node_colors = ["#d97706" if n == hub_node else "#0284c7" for n in subgraph.nodes()]
     node_sizes = [450 if n == hub_node else 120 for n in subgraph.nodes()]
 
     for idx, (ax, t_val) in enumerate(zip(axes, t_values)):
-        ax.set_facecolor("#0e1117")
+        ax.set_facecolor("#ffffff")
 
         if t_val is None:
             retained = list(sub_edges)
             pruned = []
             title = f"Original Hub Neighborhood\n|E_local| = {len(retained)} edges"
-            edge_color = "#38bdf8"
+            edge_color = "#0284c7"
         else:
             H = build_greedy_spanner(G, t=t_val, edge_order=shuffled_edges)
             retained_global = set(H.edges())
@@ -170,15 +170,15 @@ def plot_zoomed_hub_thinning():
                 if (u, v) not in retained_global and (v, u) not in retained_global
             ]
             title = f"t = {t_val} Spanner\nRetained: {len(retained)} | Pruned: {len(pruned)}"
-            edge_color = "#2dd4bf"
+            edge_color = "#0d9488"
 
         # Draw pruned edges in dashed red
         if pruned:
             nx.draw_networkx_edges(
                 subgraph, pos,
                 edgelist=pruned,
-                alpha=0.5,
-                edge_color="#ef4444",
+                alpha=0.45,
+                edge_color="#e11d48",
                 style="dashed",
                 width=1.8,
                 ax=ax
@@ -200,16 +200,18 @@ def plot_zoomed_hub_thinning():
             node_size=node_sizes,
             node_color=node_colors,
             alpha=0.95,
+            edgecolors="#1f2937",
+            linewidths=1.0,
             ax=ax
         )
 
-        ax.set_title(title, color="white", fontsize=12, pad=10, fontweight="bold")
+        ax.set_title(title, color="#111827", fontsize=12, pad=10, fontweight="bold")
         ax.axis("off")
 
     plt.suptitle(
         f"Zoomed-In View: Hub Node #{hub_node} (Gold Center) & 35 Neighbors in BA_00\n"
         "(Pruned edges = dashed red | Retained edges = solid teal)",
-        color="white",
+        color="#111827",
         fontsize=14,
         fontweight="bold",
         y=1.04
@@ -217,7 +219,7 @@ def plot_zoomed_hub_thinning():
     plt.tight_layout()
 
     out_path = os.path.join("figures", "ba_zoomed_hub_thinning.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved: {out_path}")
 

@@ -14,7 +14,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 # Ensure project root is in sys.path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.spanner import build_greedy_spanner, generate_edge_permutation
 
@@ -25,9 +25,9 @@ def ensure_figures_dir():
 
 def plot_ba00_standalone(G, pos):
     """Plot the standalone BA_00 graph with node size scaled by degree."""
-    plt.figure(figsize=(12, 12), facecolor="#0e1117")
+    plt.figure(figsize=(12, 12), facecolor="#ffffff")
     ax = plt.gca()
-    ax.set_facecolor("#0e1117")
+    ax.set_facecolor="#ffffff"
 
     degrees = dict(G.degree())
     max_deg = max(degrees.values())
@@ -54,13 +54,13 @@ def plot_ba00_standalone(G, pos):
     )
 
     cbar = plt.colorbar(nodes, ax=ax, fraction=0.03, pad=0.02)
-    cbar.set_label("Node Degree (Hub Prominence)", color="white", fontsize=12)
-    cbar.ax.yaxis.set_tick_params(color="white")
-    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='white')
+    cbar.set_label("Node Degree (Hub Prominence)", color="#111827", fontsize=12)
+    cbar.ax.yaxis.set_tick_params(color="#111827")
+    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='#111827')
 
     plt.title(
         f"Barabási–Albert Network (BA_00)\nN = {G.number_of_nodes()}, |E| = {G.number_of_edges()}, Max Degree Δ = {max_deg}",
-        color="white",
+        color="#111827",
         fontsize=15,
         pad=15,
         fontweight="bold"
@@ -69,14 +69,14 @@ def plot_ba00_standalone(G, pos):
     plt.tight_layout()
 
     out_path = os.path.join("figures", "ba_00_topology.png")
-    plt.savefig(out_path, dpi=300, facecolor=plt.gcf().get_facecolor(), bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved: {out_path}")
 
 
 def plot_spanner_thinning_progression(G, pos):
     """Plot a 4-panel progression comparing original BA_00 to t=3, t=5, and t=7 spanners."""
-    fig, axes = plt.subplots(1, 4, figsize=(24, 6), facecolor="#0e1117")
+    fig, axes = plt.subplots(1, 4, figsize=(24, 6), facecolor="#ffffff")
 
     t_values = [None, 3, 5, 7]
     degrees = dict(G.degree())
@@ -88,14 +88,14 @@ def plot_spanner_thinning_progression(G, pos):
     shuffled_edges = generate_edge_permutation(G, seed=42)
 
     for idx, (ax, t_val) in enumerate(zip(axes, t_values)):
-        ax.set_facecolor("#0e1117")
+        ax.set_facecolor("#ffffff")
 
         if t_val is None:
             # Original Graph
             title = f"Original Graph\n|E| = {G.number_of_edges()} (100%)"
             retained_edges = list(original_edges)
             pruned_edges = []
-            edge_color = "#38bdf8"  # vibrant light blue
+            edge_color = "#0284c7"  # vibrant blue
         else:
             # Build Greedy t-Spanner
             H = build_greedy_spanner(G, t=t_val, edge_order=shuffled_edges)
@@ -108,17 +108,17 @@ def plot_spanner_thinning_progression(G, pos):
             retention_pct = (len(retained_edges) / len(original_edges)) * 100
             pruned_count = len(pruned_edges)
             title = f"Greedy t-Spanner (t = {t_val})\n|E_H| = {len(retained_edges)} ({retention_pct:.1f}%) | Pruned: {pruned_count}"
-            edge_color = "#2dd4bf"  # vibrant teal
+            edge_color = "#0d9488"  # teal
 
         # Draw pruned edges in faint dashed red/gray
         if pruned_edges:
             nx.draw_networkx_edges(
                 G, pos,
                 edgelist=pruned_edges,
-                alpha=0.15,
-                edge_color="#ef4444",
+                alpha=0.20,
+                edge_color="#e11d48",
                 style="dashed",
-                width=0.4,
+                width=0.45,
                 ax=ax
             )
 
@@ -126,9 +126,9 @@ def plot_spanner_thinning_progression(G, pos):
         nx.draw_networkx_edges(
             G, pos,
             edgelist=retained_edges,
-            alpha=0.55,
+            alpha=0.60,
             edge_color=edge_color,
-            width=0.7,
+            width=0.75,
             ax=ax
         )
 
@@ -136,18 +136,18 @@ def plot_spanner_thinning_progression(G, pos):
         nx.draw_networkx_nodes(
             G, pos,
             node_size=node_sizes,
-            node_color="#f59e0b",
+            node_color="#d97706",
             alpha=0.85,
             ax=ax
         )
 
-        ax.set_title(title, color="white", fontsize=12, pad=10, fontweight="bold")
+        ax.set_title(title, color="#111827", fontsize=12, pad=10, fontweight="bold")
         ax.axis("off")
 
     plt.suptitle(
         "Empirical Greedy Map-Thinning on Barabási–Albert Instance BA_00 (N = 1000)\n"
-        "(Pruned edges shown in faint red; retained spanner edges in solid cyan/teal)",
-        color="white",
+        "(Pruned edges shown in faint red; retained spanner edges in solid teal)",
+        color="#111827",
         fontsize=15,
         fontweight="bold",
         y=1.03
@@ -155,7 +155,7 @@ def plot_spanner_thinning_progression(G, pos):
     plt.tight_layout()
 
     out_path = os.path.join("figures", "ba_00_spanner_thinning.png")
-    plt.savefig(out_path, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
     plt.close()
     print(f"Saved: {out_path}")
 
