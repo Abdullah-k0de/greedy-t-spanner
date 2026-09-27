@@ -161,3 +161,107 @@ Our raw experimental dataset [`data/spanner_experiments.csv`](file:///c:/Users/a
 - **The Question:** *Does a graph's baseline diameter dictate its stretch resistance?*
 - **How to measure it:** Scatter plot of baseline `diameter` vs `avg_stretch` across all 120 graphs.
 - **Why it matters:** Demonstrates mathematically that networks with high natural diameter (Grid: $\text{diam} \approx 50$) act as natural shock absorbers against relative stretch.
+
+---
+
+## 5. Resolving the Central Hypothesis: Hubs vs. Grid (Relative vs. Absolute Detour)
+
+The central objective formulated in the Research Proposal was:
+> *"Specifically, the study will investigate whether the presence of structural 'hubs' (scale-free networks) naturally protects average path lengths from severe stretching compared to constrained, strictly local configurations (rigid grids)."*
+
+### Chart 5: The Structural Duality (`figures/chart5_relative_vs_absolute_delay.png`)
+
+![Chart 5: Relative vs Absolute Detour](file:///c:/Users/abdul/OneDrive/Desktop/KFUPM/Research/ICS%20553%20-%20Greedy%20t-Spanner/greedy-project/figures/chart5_relative_vs_absolute_delay.png)
+
+### The Mathematical Resolution: A Remarkable Scientific Duality
+When evaluated purely by standard **Multiplicative Stretch ($\frac{d_S}{d_G}$)**, the proposal's hypothesis appears completely reversed:
+- At $t=7$, **Barabási–Albert (Hubs)** suffered an average stretch of **$1.602$** (a $60.2\%$ delay).
+- In contrast, the **2D Grid (Lattice)** maintained a remarkably low average stretch of **$1.210$** (only a $21.0\%$ delay).
+
+However, analyzing **Absolute Additive Delay ($d_S - d_G$ in hops)** reveals the underlying truth:
+- In **Barabási–Albert**, the baseline path length is tiny ($L_{orig} \approx 4.06$ hops). Pruning an edge and taking a detour through a central hub adds only **$+2.44$ hops** on average!
+- In **2D Grid**, the baseline path length is long ($L_{orig} \approx 21.70$ hops). Detouring around deleted grid edges adds **$+4.55$ hops** on average—**nearly double the absolute delay of the scale-free network!**
+
+| Topology | Baseline Distance ($L_{orig}$) | Multiplicative Stretch at $t=7$ | Absolute Detour Added ($d_S - d_G$) |
+| :--- | :---: | :---: | :---: |
+| **Barabási–Albert (BA - Hubs)** | **$4.06$ hops** | $1.602\times$ *(Appears worse)* | **$+2.44$ hops** *(Actually lower!)* |
+| **Erdős–Rényi (ER - Random)** | $5.37$ hops | $1.309\times$ | $+1.66$ hops |
+| **Watts–Strogatz (WS - Clustered)** | $8.80$ hops | $1.281\times$ | $+2.47$ hops |
+| **2D Grid (GRID - Lattice)** | **$21.70$ hops** | $1.210\times$ *(Appears better)* | **$+4.55$ hops** *(Highest detour!)* |
+
+### Scientific Verdict for Paper/Thesis Defense:
+- **Under an Additive Lens:** The hypothesis is **supported**. Scale-free hubs keep the absolute detour short ($+2.44$ hops vs. $+4.55$ hops) by acting as high-capacity express bridges.
+- **Under a Multiplicative Lens:** The hypothesis is **inverted**. Because baseline paths in scale-free graphs are so short, any additive detour represents a massive percentage increase. The 2D Grid's long baseline distance acts as a mathematical shock absorber, diluting the relative stretch.
+
+---
+
+## 6. Theoretical Pessimism & Slack Analysis
+
+Addressing the research problem posed by **Le et al. (2024)** and **Bökler et al. (2026)** regarding instances where greedy spanners degrade, this analysis quantifies the **Pessimism Gap**—the buffer between theoretical worst-case limits ($t$) and actual empirical performance.
+
+### Chart 6: Theoretical Slack & Algorithmic Practicality (`figures/chart6_theoretical_slack_and_runtime.png`)
+
+![Chart 6: Theoretical Slack and Runtime Scaling](file:///c:/Users/abdul/OneDrive/Desktop/KFUPM/Research/ICS%20553%20-%20Greedy%20t-Spanner/greedy-project/figures/chart6_theoretical_slack_and_runtime.png)
+
+### The Pessimism Index Across Topologies
+We evaluate:
+1. **Theoretical Slack:** $\text{Slack} = t - \text{Max Stretch}$ (margin below the legal ceiling).
+2. **Budget Consumed (%):** $\frac{\text{Empirical Average Stretch}}{t} \times 100\%$ (percentage of allowable distortion used).
+
+| Topology | Stretch Limit ($t$) | Empirical Mean Max Stretch | Theoretical Slack ($t - \text{Max}$) | Budget Consumed (%) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Barabási–Albert** | 3 | $2.41 \pm 0.24$ | $0.59 \pm 0.24$ | $36.6\%$ |
+| | 5 | $4.01 \pm 0.29$ | $0.99 \pm 0.29$ | $26.6\%$ |
+| | 7 | $5.46 \pm 0.56$ | **$1.54 \pm 0.56$** | **$22.9\%$** |
+| **Erdős–Rényi** | 3 | $1.79 \pm 0.17$ | $1.21 \pm 0.17$ | $33.7\%$ |
+| | 5 | $3.45 \pm 0.53$ | $1.55 \pm 0.53$ | $22.1\%$ |
+| | 7 | $5.34 \pm 0.64$ | **$1.66 \pm 0.64$** | **$18.7\%$** |
+| **2D Grid** | 3 | $2.63 \pm 0.26$ | $0.37 \pm 0.26$ | $35.7\%$ |
+| | 5 | $3.47 \pm 0.38$ | $1.53 \pm 0.38$ | $22.8\%$ |
+| | 7 | $4.42 \pm 0.54$ | **$2.58 \pm 0.54$** | **$17.3\%$** |
+| **Watts–Strogatz** | 3 | $2.39 \pm 0.25$ | $0.61 \pm 0.25$ | $38.9\%$ |
+| | 5 | $3.14 \pm 0.39$ | $1.86 \pm 0.39$ | $24.9\%$ |
+| | 7 | $3.41 \pm 0.48$ | **$3.59 \pm 0.48$** | **$18.3\%$** |
+
+### Key Practical Insights:
+1. **Conservatism Scales with $t$:** As $t$ increases from 3 to 7, the algorithm consumes an increasingly smaller fraction of its allowable stretch budget (dropping from $\approx 37\%$ down to $\approx 17\%-22\%$).
+2. **Watts–Strogatz is the Most Pessimistic Topology:** At $t=7$, the worst-case path observed in Watts–Strogatz was only $3.41$, leaving a massive safety buffer of **$3.59$ stretch units**. For small-world networks, theoretical worst-case analysis severely overestimates actual path damage.
+3. **Barabási–Albert Pushes Closest to the Limit:** BA is the only network where individual runs reached right up to the theoretical ceiling ($\text{Max Stretch} = 7.00$, $\text{Slack} = 0.0$). This confirms that scale-free topologies stress the worst-case limits of greedy spanners far more than regular lattices.
+
+---
+
+## 7. Computational Runtime Scaling & Algorithmic Practicality
+
+For algorithm engineers designing routing tables or distributed backbones, construction time is paramount.
+
+### The BFS Expansion Explosion
+The unweighted greedy spanner executes a bounded Breadth-First Search (BFS) of depth $t$ for each candidate edge. Our empirical runtime logs (`build_time_sec`) across all 3,600 runs reveal:
+
+- **Watts–Strogatz:** Remains ultra-fast and nearly flat ($4.6\text{ ms}$ at $t=3$ to $6.9\text{ ms}$ at $t=7$).
+- **2D Grid:** Remains fast and scalable ($7.2\text{ ms}$ at $t=3$ to $10.1\text{ ms}$ at $t=7$).
+- **Barabási–Albert:** Suffers an exponential runtime surge, escalating from **$20.3\text{ ms}$ to $86.4\text{ ms}$** ($4.3\times$ increase).
+
+**At $t=7$, constructing a greedy spanner on Barabási–Albert takes $12.5\times$ longer than on Watts–Strogatz!**
+
+#### Algorithmic Explanation:
+Because the diameter of Barabási–Albert is small ($L \approx 4$, $\text{diam} \approx 7$), setting $t=7$ forces the BFS queue to traverse through high-degree hubs ($\Delta > 100$) and explore almost the entire 1,000-node graph for every candidate edge. In contrast, in Grid and Watts–Strogatz, a depth-7 BFS is trapped in a tiny local neighborhood of $\le 50$ nodes, completing in microseconds.
+
+---
+
+## 8. Spanner Invariant & Connectivity Verification
+
+The revised experimental methodology explicitly required recording any disconnected node pairs as failures:
+> *"To account for potential connectivity loss at high sparsity thresholds, any disconnected pairs will be recorded as failures and excluded from the numerical stretch average."*
+
+### Empirical Verification Results
+
+| Metric | Empirical Count | Verification Status |
+| :--- | :---: | :---: |
+| **Total Spanner Constructions** | 3,600 | 100.0% Complete |
+| **Valid Spanner Assertions ($\forall e \in E_G, d_H(u,v) \le t$)** | 3,600 / 3,600 | **100.00% Valid (0 Violations)** |
+| **Independent Random Node Pairs Evaluated** | 3,600,000 | 100.0% Evaluated |
+| **Disconnected Node Pairs Observed** | **0** | **0.000000% Failure Rate** |
+| **Graph Component Partitions** | **0** | **1-Connectivity Guaranteed** |
+
+**Conclusion:** The unweighted greedy $t$-spanner algorithm preserves 100% graph connectivity across all four topologies without exception, even when pruning up to $40.4\%$ of network edges at $t=7$.
+
