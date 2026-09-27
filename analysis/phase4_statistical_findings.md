@@ -28,7 +28,7 @@ In this research, we tested how four fundamentally different network architectur
 
 ### Chart 1: The Distortion Distribution (`figures/chart1_distortion_distribution.png`)
 
-![1790530006045](image/phase4_statistical_findings/1790530006045.png)
+![1790530889044](image/phase4_statistical_findings/1790530889044.png)
 
 #### What am I looking at?
 
@@ -55,7 +55,7 @@ In this research, we tested how four fundamentally different network architectur
 
 ### Chart 2: Edge Retention Trade-off (`figures/chart2_retention_tradeoff.png`)
 
-![Chart 2: Edge Retention](<file:///c:/Users/abdul/OneDrive/Desktop/KFUPM/Research/ICS%20553%20-%20Greedy%20t-Spanner/greedy-project/figures/chart2_retention_tradeoff.png>)
+![1790530904498](image/phase4_statistical_findings/1790530904498.png)
 
 #### What am I looking at?
 
@@ -81,7 +81,7 @@ In this research, we tested how four fundamentally different network architectur
 
 ### Chart 3: Hub Correlation with Severe Stretch (`figures/chart3_hub_correlation.png`)
 
-![Chart 3: Hub Correlation](<file:///c:/Users/abdul/OneDrive/Desktop/KFUPM/Research/ICS%20553%20-%20Greedy%20t-Spanner/greedy-project/figures/chart3_hub_correlation.png>)
+![1790530915957](image/phase4_statistical_findings/1790530915957.png)
 
 #### What am I looking at?
 
@@ -103,7 +103,7 @@ In this research, we tested how four fundamentally different network architectur
 
 ### Chart 4: The Pareto Efficiency Frontier (`figures/chart4_pareto_frontier.png`)
 
-![Chart 4: Pareto Frontier](<file:///c:/Users/abdul/OneDrive/Desktop/KFUPM/Research/ICS%20553%20-%20Greedy%20t-Spanner/greedy-project/figures/chart4_pareto_frontier.png>)
+![1790530926423](image/phase4_statistical_findings/1790530926423.png)
 
 #### What am I looking at?
 
@@ -190,7 +190,7 @@ The central objective formulated in the Research Proposal was:
 
 ### Chart 5: The Structural Duality (`figures/chart5_relative_vs_absolute_delay.png`)
 
-![Chart 5: Relative vs Absolute Detour](<file:///c:/Users/abdul/OneDrive/Desktop/KFUPM/Research/ICS%20553%20-%20Greedy%20t-Spanner/greedy-project/figures/chart5_relative_vs_absolute_delay.png>)
+![1790530940009](image/phase4_statistical_findings/1790530940009.png)
 
 ### The Mathematical Resolution: A Remarkable Scientific Duality
 
@@ -224,7 +224,7 @@ Addressing the research problem posed by **Le et al. (2024)** and **Bökler et a
 
 ### Chart 6: Theoretical Slack & Algorithmic Practicality (`figures/chart6_theoretical_slack_and_runtime.png`)
 
-![Chart 6: Theoretical Slack and Runtime Scaling](<file:///c:/Users/abdul/OneDrive/Desktop/KFUPM/Research/ICS%20553%20-%20Greedy%20t-Spanner/greedy-project/figures/chart6_theoretical_slack_and_runtime.png>)
+![1790530949253](image/phase4_statistical_findings/1790530949253.png)
 
 ### The Pessimism Index Across Topologies
 
