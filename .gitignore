@@ -1,0 +1,65 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+venv-*/
+.venv/
+ENV/
+*.env
+.pytest_cache/
+.ipynb_checkpoints/
+
+# IDE & OS Artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# LaTeX Build & Working Drafts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.tex
+!main.tex
+
+# Local Documents, Notes & Auxiliary Files
+*.docx
+*.doc
+*.pptx
+*.ppt
+*.xlsx
+*.xls
+*.pdf
+*.txt
+!requirements.txt
+*.notes
+*.tmp
+*.bak
+figures/*.md
+analysis/
+notes/
+scratch/
+.git_backup/
+apply_*.py
+build_*.py
+
+# Raw GraphML & Pair Cache Dumps (Track CSV datasets)
+data/graphs/
+data/pairs/
+!data/*.csv

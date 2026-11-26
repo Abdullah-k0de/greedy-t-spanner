@@ -1,0 +1,379 @@
+"""Generate Visualizations for Baseline Structural Profiles.
+
+Uses empirical data from:
+- data/graphs/*.graphml (120 benchmark graph instances)
+- data/baseline_metrics.csv (120 baseline structural measurements)
+
+Outputs:
+1. figures/baseline_topologies_native_layouts.png:
+   2x2 panel showing BA (Hub-Centric), WS (Circular Ring), ER (Uniform Random), and Grid (Planar 25x40).
+2. figures/baseline_degree_distributions.png:
+   Empirical degree distribution P(k) across all 120,000 nodes (30 instances x 4 topologies)
+   in both linear and log-log scales.
+3. figures/baseline_clustering_vs_path_length.png:
+   Phase space scatter plot (C vs L) for all 120 independent instances showing topological separation.
+"""
+
+import os
+import sys
+import glob
+import numpy as np
+import pandas as pd
+import networkx as nx
+import matplotlib.pyplot as plt
+from collections import Counter
+
+# Ensure project root is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+
+def ensure_figures_dir():
+    os.makedirs("figures", exist_ok=True)
+
+
+def plot_topologies_native_layouts():
+    """Generate 2x2 panel showing BA, WS, ER, and Grid in their native layouts."""
+    print("Rendering 2x2 Native Layouts Comparison...")
+    fig, axes = plt.subplots(2, 2, figsize=(18, 16), facecolor="#ffffff")
+
+    topo_configs = [
+        ("BA_00", "Barabási–Albert (BA_00)", axes[0, 0], "ba"),
+        ("WS_00", "Watts–Strogatz (WS_00)", axes[0, 1], "ws"),
+        ("ER_00", "Erdős–Rényi Repaired (ER_00)", axes[1, 0], "er"),
+        ("GRID_00", "Perturbed 2D Grid (GRID_00)", axes[1, 1], "grid"),
+    ]
+
+    for filename_stem, title, ax, layout_type in topo_configs:
+        ax.set_facecolor("#ffffff")
+        graph_path = os.path.join("data", "graphs", f"{filename_stem}.graphml")
+        if not os.path.exists(graph_path):
+            print(f"Warning: {graph_path} not found.")
+            continue
+
+        G = nx.read_graphml(graph_path)
+        G = nx.convert_node_labels_to_integers(G)
+        degrees = dict(G.degree())
+        max_deg = max(degrees.values())
+
+        if layout_type == "ws":
+            # Circular layout highlights local lattice chords and cross-ring shortcuts
+            pos = nx.circular_layout(G)
+            edge_color = "#0284c7"
+            edge_alpha = 0.35
+            edge_width = 0.5
+            node_sizes = [12 for _ in G.nodes()]
+            node_color = "#d97706"
+            subtitle = f"N = {G.number_of_nodes()}, |E| = {G.number_of_edges()} | Circular Layout (Ring + Shortcuts)"
+
+        elif layout_type == "grid":
+            # True 2D coordinate lattice (25 rows x 40 cols)
+            cols = 40
+            pos = {i: (i % cols, -(i // cols)) for i in G.nodes()}
+            edge_color = "#0d9488"
+            edge_alpha = 0.85
+            edge_width = 0.8
+            node_sizes = [6 for _ in G.nodes()]
+            node_color = "#1f2937"
+            subtitle = f"N = {G.number_of_nodes()}, |E| = {G.number_of_edges()} | Planar 25x40 Coordinate Lattice"
+
+        elif layout_type == "ba":
+            # Spring layout with node size proportional to hub degree
+            pos = nx.spring_layout(G, k=0.08, iterations=50, seed=42)
+            edge_color = "#64748b"
+            edge_alpha = 0.25
+            edge_width = 0.5
+            node_sizes = [10 + 180 * (degrees[n] / max_deg) for n in G.nodes()]
+            node_color = [degrees[n] for n in G.nodes()]
+            subtitle = f"N = {G.number_of_nodes()}, |E| = {G.number_of_edges()} | Hub-Prominence (Max Δ = {max_deg})"
+
+        else:  # er
+            # Uniform spring layout
+            pos = nx.spring_layout(G, k=0.06, iterations=50, seed=42)
+            edge_color = "#e11d48"
+            edge_alpha = 0.30
+            edge_width = 0.5
+            node_sizes = [12 for _ in G.nodes()]
+            node_color = "#be123c"
+            subtitle = f"N = {G.number_of_nodes()}, |E| = {G.number_of_edges()} | Uniform Random Dispersion"
+
+        # Draw edges
+        nx.draw_networkx_edges(
+            G, pos,
+            alpha=edge_alpha,
+            edge_color=edge_color,
+            width=edge_width,
+            ax=ax
+        )
+
+        # Draw nodes
+        if layout_type == "ba":
+            nx.draw_networkx_nodes(
+                G, pos,
+                node_size=node_sizes,
+                node_color=node_color,
+                cmap=plt.cm.plasma,
+                alpha=0.85,
+                ax=ax
+            )
+        else:
+            nx.draw_networkx_nodes(
+                G, pos,
+                node_size=node_sizes,
+                node_color=node_color,
+                alpha=0.85,
+                ax=ax
+            )
+
+        ax.set_title(f"{title}\n{subtitle}", color="#111827", fontsize=13, pad=10, fontweight="bold")
+        ax.axis("off")
+
+    plt.suptitle(
+        "Topological Archetypes Under Density Control (N = 1000, d_bar ≈ 3.8 - 4.0)\n"
+        "Rendered in Respective Native Geometries",
+        color="#111827",
+        fontsize=16,
+        fontweight="bold",
+        y=0.99
+    )
+    plt.tight_layout()
+
+    out_path = os.path.join("figures", "baseline_topologies_native_layouts.png")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {out_path}")
+
+
+def plot_empirical_degree_distributions():
+    """Aggregate actual node degrees from all 120 graphs and plot P(k) on Linear and Log-Log scales."""
+    print("Aggregating degrees from all 120 graph instances...")
+
+    degree_data = {"BA": [], "WS": [], "ER": [], "GRID": []}
+
+    graph_files = glob.glob(os.path.join("data", "graphs", "*.graphml"))
+    if not graph_files:
+        print("No graph files found in data/graphs/.")
+        return
+
+    for fpath in graph_files:
+        basename = os.path.basename(fpath)
+        topo = basename.split("_")[0]
+        if topo in degree_data:
+            G = nx.read_graphml(fpath)
+            for _, d in G.degree():
+                degree_data[topo].append(d)
+
+    colors = {
+        "BA": "#d97706",   # Deep Amber
+        "WS": "#0284c7",   # Vibrant Blue
+        "ER": "#e11d48",   # Crimson
+        "GRID": "#0d9488"  # Forest Teal
+    }
+
+    labels = {
+        "BA": "Barabási–Albert (Scale-Free)",
+        "WS": "Watts–Strogatz (Small-World)",
+        "ER": "Erdős–Rényi (Poisson)",
+        "GRID": "2D Grid (Lattice)"
+    }
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7), facecolor="#ffffff")
+    ax1.set_facecolor("#ffffff")
+    ax2.set_facecolor("#ffffff")
+
+    # Plot 1: Linear Probability Density P(k)
+    for topo, degs in degree_data.items():
+        total_nodes = len(degs)
+        counts = Counter(degs)
+        k_vals = sorted(counts.keys())
+        p_k = [counts[k] / total_nodes for k in k_vals]
+
+        ax1.plot(
+            k_vals, p_k,
+            marker='o',
+            markersize=5,
+            linewidth=1.8,
+            color=colors[topo],
+            label=f"{labels[topo]} (N={total_nodes})"
+        )
+
+    ax1.set_title("Empirical Degree Distribution P(k) [Linear Scale]", color="#111827", fontsize=14, fontweight="bold", pad=12)
+    ax1.set_xlabel("Degree (k)", color="#374151", fontsize=12)
+    ax1.set_ylabel("Probability P(k)", color="#374151", fontsize=12)
+    ax1.tick_params(colors="#111827")
+    for spine in ax1.spines.values():
+        spine.set_color("#9ca3af")
+    ax1.grid(color="#e5e7eb", linestyle="--", alpha=0.7)
+    ax1.legend(facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=10.5)
+
+    # Plot 2: Log-Log Scale to expose Power-Law vs Bounded Tails
+    for topo, degs in degree_data.items():
+        total_nodes = len(degs)
+        counts = Counter(degs)
+        k_vals = [k for k in sorted(counts.keys()) if k > 0]
+        p_k = [counts[k] / total_nodes for k in k_vals]
+
+        ax2.loglog(
+            k_vals, p_k,
+            marker='o',
+            markersize=6,
+            linewidth=2.0,
+            color=colors[topo],
+            label=f"{labels[topo]}"
+        )
+
+    ax2.set_title("Topological Degree Fingerprint [Log-Log Scale]\n(Power-Law Line vs Poisson vs Rigid Spike)", color="#111827", fontsize=14, fontweight="bold", pad=12)
+    ax2.set_xlabel("Degree k (log scale)", color="#374151", fontsize=12)
+    ax2.set_ylabel("Probability P(k) (log scale)", color="#374151", fontsize=12)
+    ax2.tick_params(colors="#111827")
+    for spine in ax2.spines.values():
+        spine.set_color("#9ca3af")
+    ax2.grid(color="#e5e7eb", linestyle="--", alpha=0.7)
+    ax2.legend(facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=10.5)
+
+    plt.suptitle(
+        f"Empirical Degree Distributions Aggregated Over All 120 Instances (120,000 Nodes Total)\n"
+        f"Structural Divergence Across Topologies Under Matched Mean Degree (d_bar ≈ 3.8–4.0)",
+        color="#111827",
+        fontsize=15,
+        fontweight="bold",
+        y=1.03
+    )
+    plt.tight_layout()
+
+    out_path = os.path.join("figures", "baseline_degree_distributions.png")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {out_path}")
+
+
+def plot_clustering_vs_path_length():
+    """Plot Clustering Coefficient (C) vs Average Shortest Path Length (L) for all 120 instances."""
+    print("Rendering Clustering vs Path Length Phase Space...")
+
+    csv_path = os.path.join("data", "baseline_metrics.csv")
+    if not os.path.exists(csv_path):
+        print(f"Error: {csv_path} not found.")
+        return
+
+    df = pd.read_csv(csv_path)
+
+    fig, ax = plt.subplots(figsize=(12, 8), facecolor="#ffffff")
+    ax.set_facecolor("#ffffff")
+
+    colors = {
+        "BA": "#d97706",
+        "WS": "#0284c7",
+        "ER": "#e11d48",
+        "GRID": "#0d9488"
+    }
+
+    markers = {
+        "BA": "o",
+        "WS": "s",
+        "ER": "^",
+        "GRID": "D"
+    }
+
+    labels = {
+        "BA": "Barabási–Albert (Hubs / Short Paths)",
+        "WS": "Watts–Strogatz (High Clustering)",
+        "ER": "Erdős–Rényi (Uniform Random)",
+        "GRID": "2D Grid (Rigid Lattice / High Diameter)"
+    }
+
+    for topo, group in df.groupby("topology"):
+        ax.scatter(
+            group["avg_shortest_path_length"],
+            group["clustering_coefficient"],
+            c=colors[topo],
+            marker=markers[topo],
+            s=90,
+            alpha=0.85,
+            edgecolors="#1f2937",
+            linewidths=0.7,
+            label=f"{labels[topo]} (N=30)"
+        )
+
+    ax.set_title(
+        "Empirical Phase Space: Clustering Coefficient (C) vs. Average Path Length (L)\n"
+        "120 Independent Benchmark Instances (N = 1000, d_bar ≈ 3.8 - 4.0)",
+        color="#111827",
+        fontsize=14,
+        fontweight="bold",
+        pad=15
+    )
+    ax.set_xlabel("Average Shortest-Path Length (L)", color="#374151", fontsize=12)
+    ax.set_ylabel("Average Clustering Coefficient (C)", color="#374151", fontsize=12)
+    ax.tick_params(colors="#111827", labelsize=10.5)
+    for spine in ax.spines.values():
+        spine.set_color("#9ca3af")
+    ax.grid(color="#e5e7eb", linestyle="--", alpha=0.7)
+    ax.legend(facecolor="#ffffff", edgecolor="#d1d5db", labelcolor="#111827", fontsize=11, loc="center right")
+
+    # Add explanatory callout annotations for all 4 topologies individually
+    ax.annotate(
+        "Watts–Strogatz\n(High Clustering C ≈ 0.37,\nShort Paths L ≈ 8.8)",
+        xy=(8.80, 0.373),
+        xytext=(11.0, 0.35),
+        color="#0284c7",
+        fontsize=10,
+        fontweight="bold",
+        arrowprops=dict(facecolor="#0284c7", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+    )
+
+    ax.annotate(
+        "Barabási–Albert\n(Ultra-Short Paths L ≈ 4.1,\nHubs / Low Clustering C ≈ 0.026)",
+        xy=(4.06, 0.026),
+        xytext=(3.4, 0.16),
+        color="#d97706",
+        fontsize=10,
+        fontweight="bold",
+        arrowprops=dict(facecolor="#d97706", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+    )
+
+    ax.annotate(
+        "Erdős–Rényi (Random)\n(Short Paths L ≈ 5.4,\nNear-Zero Clustering C ≈ 0.0036)",
+        xy=(5.37, 0.0036),
+        xytext=(7.2, 0.07),
+        color="#e11d48",
+        fontsize=10,
+        fontweight="bold",
+        arrowprops=dict(facecolor="#e11d48", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+    )
+
+    ax.annotate(
+        "Perturbed 2D Grid\n(Zero Clustering C = 0,\nHigh Path Length L ≈ 21.7)",
+        xy=(21.70, 0.000),
+        xytext=(16.0, 0.08),
+        color="#0d9488",
+        fontsize=10,
+        fontweight="bold",
+        arrowprops=dict(facecolor="#0d9488", edgecolor="none", shrink=0.08, width=1.5, headwidth=6)
+    )
+
+    plt.tight_layout()
+    out_path = os.path.join("figures", "baseline_clustering_vs_path_length.png")
+    plt.savefig(out_path, dpi=300, facecolor="#ffffff", bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {out_path}")
+
+
+def main():
+    print("=" * 70)
+    print("GENERATING BASELINE STRUCTURAL PROFILE VISUALIZATIONS")
+    print("Using empirical data from 120 benchmark graphs and baseline_metrics.csv")
+    print("=" * 70)
+    ensure_figures_dir()
+
+    plot_topologies_native_layouts()
+    plot_empirical_degree_distributions()
+    plot_clustering_vs_path_length()
+
+    print("=" * 70)
+    print("All baseline visualizations generated.")
+    print("Check figures/ directory for outputs.")
+    print("=" * 70)
+
+
+if __name__ == "__main__":
+    main()
